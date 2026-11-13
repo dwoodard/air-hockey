@@ -1,0 +1,22 @@
+:root{color-scheme:dark;font:16px system-ui,sans-serif;background:#08121d;color:#effaff;--blue:#54f4da;--red:#ff7186}
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:8px 12px}
+main{width:min(100%, calc((100dvh - 110px)*480/680),480px);min-width:min(100%,250px)}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+h1,h2,p{margin:0}h1{font-size:clamp(1.3rem,4vw,1.8rem)}h2{font-size:clamp(1.5rem,5vw,2.4rem)}
+small{color:var(--blue);font-weight:750;letter-spacing:.16em;font-size:.65rem}
+.rink{position:relative;isolation:isolate;overflow:hidden;border-radius:24px;border:1px solid #365467;box-shadow:0 16px 60px #0008}
+canvas{display:block;width:100%;height:auto;touch-action:none;user-select:none}
+.score{position:absolute;top:10px;left:50%;transform:translateX(-50%);padding:4px 12px;border-radius:30px;background:#08121de8;font-weight:800;font-variant-numeric:tabular-nums;pointer-events:none;white-space:nowrap}
+.score span{color:#85a6b7}
+section{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px;background:#08121de8;text-align:center}
+p,footer{color:#afc6d2;font-size:.8rem}
+footer{text-align:center;margin-top:8px}
+button,input{font:inherit;border-radius:10px;border:1px solid #38586a;padding:8px 10px;min-height:40px;background:#102738;color:inherit}
+button{cursor:pointer;font-weight:700}button:hover{border-color:var(--blue)}
+.primary{background:var(--blue);color:#052b2c;border-color:var(--blue)}
+form,#choices,#invite{display:flex;align-items:center;gap:6px;justify-content:center}
+input{width:120px;text-transform:uppercase}
+#room{letter-spacing:.12em;color:var(--blue)}
+[hidden]{display:none!important}
+@media (max-height:500px) and (orientation:landscape){main{min-width:min(100%,190px)}body{padding:4px}header{margin-bottom:3px}header small,footer{display:none}section{gap:3px}h2{font-size:1.15rem}button,input{min-height:32px;padding:3px 5px;font-size:.78rem}.score{top:3px}}

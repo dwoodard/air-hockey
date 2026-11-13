@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08121d">
+<title>Air Hockey</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg">
+<link rel="stylesheet" href="./game.css">
+<script defer src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script defer src="./game.js"></script>
+</head>
+<body>
+<main>
+<header><div><small>ARCADE CLUB</small><h1>Air Hockey</h1></div><button id="menu" hidden>Exit match</button></header>
+<div class="rink">
+<canvas width="480" height="680" aria-label="Air hockey rink"></canvas>
+<div class="score" id="score" aria-live="polite">0 <span>:</span> 0</div>
+<section id="panel">
+<small>FIRST TO 7</small><h2 id="headline">Hit the ice.</h2>
+<p id="notice" role="status">Play the CPU or invite a friend.</p>
+<div id="choices"><button id="solo" class="primary">Play solo</button><button id="host">Host online</button></div>
+<form id="join"><input id="code" aria-label="Room code" placeholder="Room code" maxlength="6" required pattern="[A-Za-z0-9]{6}"><button>Join</button></form>
+<div id="invite" hidden><strong id="room"></strong><button id="copy">Copy invite</button></div>
+<button id="back" hidden>Back to menu</button>
+</section>
+</div>
+<footer id="hint">Drag your paddle • Mouse and touch supported</footer>
+</main>
+</body>
+</html>

@@ -1,4 +1,4 @@
-const cacheName = 'air-hockey-v5'
+const cacheName = 'air-hockey-v6'
 const shell = ['./','./index.html','./game.css','./game.js','./icon.svg','./manifest.webmanifest']
 self.addEventListener('install', e => e.waitUntil(caches.open(cacheName).then(c=>c.addAll(shell))))
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('air-hockey-')&&k!==cacheName).map(k=>caches.delete(k)))).then(()=>self.clients.claim())))

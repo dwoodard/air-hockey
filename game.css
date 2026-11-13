@@ -17,6 +17,7 @@ button{cursor:pointer;font-weight:700}button:hover{border-color:var(--blue)}
 .primary{background:var(--blue);color:#052b2c;border-color:var(--blue)}
 form,#choices,#invite{display:flex;align-items:center;gap:6px;justify-content:center}
 input{width:120px;text-transform:uppercase}
+#invite{flex-wrap:wrap}
 #room{letter-spacing:.12em;color:var(--blue)}
 [hidden]{display:none!important}
 @media (max-height:500px) and (orientation:landscape){main{min-width:min(100%,190px)}body{padding:4px}header{margin-bottom:3px}header small,footer{display:none}section{gap:3px}h2{font-size:1.15rem}button,input{min-height:32px;padding:3px 5px;font-size:.78rem}.score{top:3px}}

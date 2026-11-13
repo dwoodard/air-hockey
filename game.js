@@ -184,9 +184,18 @@ $('solo').onclick=()=>resetMatch('solo')
 $('menu').onclick=$('back').onclick=()=>showMenu()
 $('host').onclick=()=>startOnline('host',Array.from(crypto.getRandomValues(new Uint8Array(6)),n=>alphabet[n%alphabet.length]).join(''))
 $('join').onsubmit=e=>{e.preventDefault();startOnline('guest',$('code').value.trim().toUpperCase())}
+function inviteLink(){
+  const url=new URL('./',location.href)
+  url.searchParams.set('room',inviteCode)
+  return url.href
+}
 $('copy').onclick=async()=>{
-  const url=new URL(location.href);url.searchParams.set('room',inviteCode)
-  try{await navigator.clipboard.writeText(url.href);$('notice').textContent='Invite link copied.'}catch{$('notice').textContent='Share the room code shown below.'}
+  try{await navigator.clipboard.writeText(inviteLink());$('notice').textContent='Invite link copied.'}catch{$('notice').textContent='Share the room code shown below.'}
+}
+$('share').hidden=typeof navigator.share!=='function'
+$('share').onclick=async()=>{
+  try{await navigator.share({title:'Air Hockey',text:'Join my air hockey match!',url:inviteLink()})}
+  catch(error){if(error.name!=='AbortError')$('notice').textContent='Could not open sharing. Use Copy link instead.'}
 }
 const incomingRoom=new URLSearchParams(location.search).get('room')
 if(/^[A-Z0-9]{6}$/i.test(incomingRoom||'')){$('code').value=incomingRoom.toUpperCase();$('notice').textContent='Room code filled in. Tap Join to play.'}

@@ -85,7 +85,14 @@ function hit(p) {
 }
 function step(dt) {
   move(a,aim,dt,1450)
-  const cpu={x:clamp(puck.y<H*.60?puck.x:W/2,R,W-R),y:puck.y<H*.44?clamp(puck.y-22,R+4,H/2-R):105}
+  // Approach from behind the puck to drive it downfield, not into the top wall.
+  // A puck in the top corner is unreachable from behind: retreat until it clears.
+  const cornered = puck.y < R+P+24 && (puck.x < R+P+24 || puck.x > W-R-P-24)
+  const attacking = puck.y < H*.44 && puck.y > R+P+20 && !cornered
+  const cpu = {
+    x: attacking ? clamp(puck.x+puck.vx*.04,R,W-R) : clamp(puck.y<H*.60?puck.x:W/2,R+P+8,W-R-P-8),
+    y: attacking ? clamp(puck.y-radius(b)-P-10,R+4,H/2-R) : 105
+  }
   move(b,mode==='solo'?cpu:remote,dt,mode==='solo'?480:1450)
   if(pause>0){pause-=dt;return}
   puck.x+=puck.vx*dt; puck.y+=puck.vy*dt
@@ -103,6 +110,12 @@ function step(dt) {
         if(gameOver()){sendState();end()}else serve(top?1:-1)
       }
     }else{puck.y=clamp(puck.y,P,H-P);puck.vy=(puck.y===P?1:-1)*Math.abs(puck.vy)}
+  }
+  // The CPU cannot get behind a puck trapped against the top corners.
+  // Break a low-speed corner jam toward the center instead of pinning it forever.
+  if(mode==='solo' && puck.y < R+P+25 && (puck.x < R+P+25 || puck.x > W-R-P-25) && Math.hypot(puck.vx,puck.vy)<110){
+    puck.vx=puck.x<W/2?140:-140
+    puck.vy=190
   }
   if(speed<14&&puck.y>P&&puck.y<H-P){puck.vx=55;puck.vy=puck.y>H/2?-165:165}
 }

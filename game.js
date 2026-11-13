@@ -243,4 +243,61 @@ $('share').onclick=async()=>{
 const incomingRoom=new URLSearchParams(location.search).get('room')
 if(/^[A-Z0-9]{6}$/i.test(incomingRoom||'')){$('code').value=incomingRoom.toUpperCase();$('notice').textContent='Room code filled in. Tap Join to play.'}
 requestAnimationFrame(frame)
-if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{})
+const settingsDialog=$('settings-dialog')
+const updateStatus=$('update-status')
+const checkUpdate=$('check-update')
+const applyUpdate=$('apply-update')
+let swRegistration=null, updateReady=false
+function refreshUpdateUI() {
+  updateReady=!!swRegistration?.waiting
+  applyUpdate.hidden=!updateReady
+  applyUpdate.disabled=phase==='play'
+  if(updateReady) updateStatus.textContent=phase==='play'
+    ? 'Update ready. Finish your match, then return here to install.'
+    : 'A new version is ready to install.'
+}
+$('settings-toggle').onclick=()=>{
+  refreshUpdateUI()
+  settingsDialog.showModal()
+}
+$('settings-close').onclick=()=>settingsDialog.close()
+checkUpdate.onclick=async()=>{
+  if(!('serviceWorker'in navigator)){
+    updateStatus.textContent='Updates are not supported in this browser.'
+    return
+  }
+  checkUpdate.disabled=true
+  updateStatus.textContent='Checking for updates…'
+  try {
+    swRegistration=await navigator.serviceWorker.getRegistration('./') || await navigator.serviceWorker.register('./sw.js')
+    await swRegistration.update()
+    if(swRegistration.waiting)refreshUpdateUI()
+    else if(swRegistration.installing){
+      updateStatus.textContent='Downloading update…'
+    }else updateStatus.textContent='No new update found. You are on the latest available version.'
+  } catch {
+    updateStatus.textContent='Could not check for updates. Check your connection and try again.'
+  } finally {
+    checkUpdate.disabled=false
+  }
+}
+applyUpdate.onclick=()=>{
+  if(phase==='play'||!swRegistration?.waiting)return
+  updateStatus.textContent='Installing update…'
+  swRegistration.waiting.postMessage({type:'SKIP_WAITING'})
+}
+if('serviceWorker'in navigator){
+  navigator.serviceWorker.addEventListener('controllerchange',()=>location.reload())
+  navigator.serviceWorker.register('./sw.js').then(reg=>{
+    swRegistration=reg
+    refreshUpdateUI()
+    reg.addEventListener('updatefound',()=>{
+      const worker=reg.installing
+      worker?.addEventListener('statechange',()=>{
+        if(worker.state==='installed'&&navigator.serviceWorker.controller){
+          refreshUpdateUI()
+        }
+      })
+    })
+  }).catch(()=>{})
+}

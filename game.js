@@ -7,6 +7,29 @@ const paddle = y => ({ x: W/2, y, vx: 0, vy: 0 })
 const a = paddle(H-105), b = paddle(105)
 const aim = { x:a.x, y:a.y }, remote = { x:b.x, y:b.y }
 const puck = {x:W/2,y:H/2,vx:0,vy:0}
+const BOOST_SCALE = 1.6, BOOST_TIME = 8
+const boost = { x: W/2, y: H/2, active: false, next: 8, remaining: [0,0], lastHit: 0 }
+const radius = p => R * (boost.remaining[p===a?0:1]>0 ? BOOST_SCALE : 1)
+function resetBoost() {
+  boost.active=false; boost.next=8; boost.remaining=[0,0]; boost.lastHit=0
+}
+function updateBoost(dt) {
+  for(let i=0;i<2;i++)boost.remaining[i]=Math.max(0,boost.remaining[i]-dt)
+  if(boost.active) {
+    if(Math.hypot(puck.x-boost.x,puck.y-boost.y)<P+18) {
+      boost.remaining[boost.lastHit]=BOOST_TIME
+      boost.active=false
+      boost.next=15+Math.random()*5
+    }
+  } else if(boost.remaining.every(n=>n===0)) {
+    boost.next-=dt
+    if(boost.next<=0) {
+      boost.x=80+Math.random()*(W-160)
+      boost.y=H*.32+Math.random()*(H*.36)
+      boost.active=true
+    }
+  }
+}
 let mode = '', phase = 'menu', peer, conn, generation = 0, inviteCode = ''
 let scores = [0,0], pause = 0, last = 0, tick = 0, snapshot = null
 const prefix = 'dwoodard-air-hockey-v1-'
@@ -17,7 +40,7 @@ function serve(dir) {
   pause=.75
 }
 function resetMatch(role) {
-  mode=role; phase='play'; scores=[0,0]; snapshot=null; tick=0
+  mode=role; phase='play'; scores=[0,0]; snapshot=null; tick=0; resetBoost()
   Object.assign(a,paddle(H-105)); Object.assign(b,paddle(105))
   Object.assign(aim,{x:a.x,y:a.y}); Object.assign(remote,{x:b.x,y:b.y})
   serve(1); updateScore()
@@ -30,7 +53,7 @@ function updateScore() {
 }
 function showMenu(message='Play the CPU or invite a friend.') {
   generation++; conn?.close(); peer?.destroy(); conn=null; peer=null
-  mode=''; phase='menu'; scores=[0,0]; snapshot=null; updateScore()
+  mode=''; phase='menu'; scores=[0,0]; snapshot=null; resetBoost(); updateScore()
   $('panel').hidden=false; $('menu').hidden=true; $('choices').hidden=false
   $('join').hidden=false; $('invite').hidden=true; $('back').hidden=true
   $('headline').textContent='Hit the ice.'; $('notice').textContent=message
@@ -44,14 +67,18 @@ function end() {
   $('notice').textContent=won?'First to seven.':'Your opponent reached seven.'
 }
 function move(p,t,dt,speed) {
-  const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy),f=d?Math.min(1,speed*dt/d):0
+  const r=radius(p), upper=p===b
+  const tx=clamp(t.x,r,W-r), ty=clamp(t.y,upper?r:H/2+r,upper?H/2-r:H-r)
+  const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy),f=d?Math.min(1,speed*dt/d):0
   p.x+=dx*f;p.y+=dy*f;p.vx=dx*f/dt;p.vy=dy*f/dt
 }
 function hit(p) {
   const dx=puck.x-p.x,dy=puck.y-p.y,d=Math.hypot(dx,dy)
-  if(d>=R+P)return
+  const r=radius(p)
+  if(d>=r+P)return
   const nx=d?dx/d:0,ny=d?dy/d:(p===a?-1:1)
-  puck.x=p.x+nx*(R+P+.2); puck.y=p.y+ny*(R+P+.2)
+  puck.x=p.x+nx*(r+P+.2); puck.y=p.y+ny*(r+P+.2)
+  boost.lastHit=p===a?0:1
   const incoming=puck.vx*nx+puck.vy*ny, push=p.vx*nx+p.vy*ny
   const impulse=Math.max(0,Math.max(165,-incoming*.91+push*.8)-incoming)
   puck.vx+=nx*impulse; puck.vy+=ny*impulse
@@ -63,6 +90,7 @@ function step(dt) {
   if(pause>0){pause-=dt;return}
   puck.x+=puck.vx*dt; puck.y+=puck.vy*dt
   hit(a); hit(b)
+  updateBoost(dt)
   const speed=Math.hypot(puck.vx,puck.vy)
   const f=speed>1150?1150/speed:Math.pow(.992,dt*60)
   puck.vx*=f;puck.vy*=f
@@ -92,8 +120,20 @@ function draw() {
   ctx.fillStyle='#54f4da';ctx.fillRect(W/2-goal,H-7,goal*2,7)
   const guest=mode==='guest'
   const paint=(p,color,inside,r)=>disc(guest?W-p.x:p.x,guest?H-p.y:p.y,r,inside,color)
-  paint(a,guest?'#ff7186':'#54f4da',guest?'#763948':'#1b665f',R)
-  paint(b,guest?'#54f4da':'#ff7186',guest?'#1b665f':'#763948',R)
+  if(boost.active) {
+    const x=guest?W-boost.x:boost.x,y=guest?H-boost.y:boost.y
+    ctx.save();ctx.shadowColor='#ffe274';ctx.shadowBlur=24
+    disc(x,y,18,'#77521e','#ffdc62')
+    ctx.fillStyle='#fff3a6';ctx.font='bold 20px system-ui';ctx.textAlign='center';ctx.textBaseline='middle'
+    ctx.fillText('↑',x,y);ctx.restore()
+  }
+  for(const [p,color,inside] of [[a,guest?'#ff7186':'#54f4da',guest?'#763948':'#1b665f'],[b,guest?'#54f4da':'#ff7186',guest?'#1b665f':'#763948']]) {
+    if(radius(p)>R) {
+      ctx.save();ctx.shadowColor=color;ctx.shadowBlur=22
+      paint(p,color,inside,radius(p))
+      ctx.restore()
+    } else paint(p,color,inside,R)
+  }
   paint(puck,'#d4f3ff','#7b9eae',P)
 }
 function send(data) {
@@ -101,7 +141,7 @@ function send(data) {
   try{conn.send(data)}catch{showMenu('Connection lost. Start a new match.')}
 }
 function sendState(){
-  if(mode==='host')send({type:'state',a:[a.x,a.y],b:[b.x,b.y],p:[puck.x,puck.y],s:scores.slice()})
+  if(mode==='host')send({type:'state',a:[a.x,a.y],b:[b.x,b.y],p:[puck.x,puck.y],s:scores.slice(),power:{active:boost.active,x:boost.x,y:boost.y,remaining:boost.remaining.slice()}})
 }
 function frame(t) {
   const dt=Math.min(.04,(t-last)/1000||.016);last=t
@@ -174,6 +214,9 @@ function startOnline(role,code) {
         const validPair=p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)
         if(![data.a,data.b,data.p,data.s].every(validPair))return
         snapshot=data
+        if(data.power&&typeof data.power.active==='boolean'&&Number.isFinite(data.power.x)&&Number.isFinite(data.power.y)&&Array.isArray(data.power.remaining)&&data.power.remaining.length===2&&data.power.remaining.every(n=>Number.isFinite(n)&&n>=0&&n<=BOOST_TIME)) {
+          boost.active=data.power.active;boost.x=data.power.x;boost.y=data.power.y;boost.remaining=data.power.remaining
+        }
         if(scores[0]!==data.s[0]||scores[1]!==data.s[1]){scores=data.s;updateScore()}
         if(gameOver())end()
       }

@@ -21,3 +21,15 @@ input{width:120px;text-transform:uppercase}
 #room{letter-spacing:.12em;color:var(--blue)}
 [hidden]{display:none!important}
 @media (max-height:500px) and (orientation:landscape){main{min-width:min(100%,190px)}body{padding:4px}header{margin-bottom:3px}header small,footer{display:none}section{gap:3px}h2{font-size:1.15rem}button,input{min-height:32px;padding:3px 5px;font-size:.78rem}.score{top:3px}}
+
+.header-actions{display:flex;gap:6px;align-items:center}
+#settings-toggle{font-size:.8rem}
+#settings-dialog{width:min(90vw,380px);border:1px solid #41677a;border-radius:18px;padding:20px;background:#102738;color:#effaff;box-shadow:0 24px 80px #000b}
+#settings-dialog::backdrop{background:#000b}
+.settings-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.settings-head button{min-height:32px;padding:4px 10px}
+#settings-dialog h3{font-size:1rem;margin:0 0 8px}
+#settings-dialog p{line-height:1.5;margin-bottom:14px}
+#settings-dialog .settings-note{margin:14px 0 0;font-size:.73rem}
+#check-update,#apply-update{width:100%}
+#check-update:disabled,#apply-update:disabled{opacity:.5;cursor:not-allowed}

@@ -1,7 +1,7 @@
 const $ = id => document.getElementById(id)
 const canvas = document.querySelector('canvas')
 const ctx = canvas.getContext('2d')
-const W = 480, H = 680, R = 32, P = 15, goal = 92
+const W = 480, H = 760, R = 32, P = 15, goal = 92
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n))
 const paddle = y => ({ x: W/2, y, vx: 0, vy: 0 })
 const a = paddle(H-105), b = paddle(105)

@@ -1,7 +1,7 @@
 :root{color-scheme:dark;font:16px system-ui,sans-serif;background:#08121d;color:#effaff;--blue:#54f4da;--red:#ff7186}
 *{box-sizing:border-box}
 body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:8px 12px}
-main{width:min(100%, calc((100dvh - 110px)*480/680),480px);min-width:min(100%,250px)}
+main{width:min(100%, calc((100dvh - 110px)*480/760),480px);min-width:min(100%,250px)}
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 h1,h2,p{margin:0}h1{font-size:clamp(1.3rem,4vw,1.8rem)}h2{font-size:clamp(1.5rem,5vw,2.4rem)}
 small{color:var(--blue);font-weight:750;letter-spacing:.16em;font-size:.65rem}

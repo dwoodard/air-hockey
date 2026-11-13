@@ -247,7 +247,7 @@ const settingsDialog=$('settings-dialog')
 const updateStatus=$('update-status')
 const checkUpdate=$('check-update')
 const applyUpdate=$('apply-update')
-let swRegistration=null, updateReady=false
+let swRegistration=null, updateReady=false, applyingUpdate=false
 function refreshUpdateUI() {
   updateReady=!!swRegistration?.waiting
   applyUpdate.hidden=!updateReady
@@ -284,10 +284,11 @@ checkUpdate.onclick=async()=>{
 applyUpdate.onclick=()=>{
   if(phase==='play'||!swRegistration?.waiting)return
   updateStatus.textContent='Installing update…'
+  applyingUpdate=true
   swRegistration.waiting.postMessage({type:'SKIP_WAITING'})
 }
 if('serviceWorker'in navigator){
-  navigator.serviceWorker.addEventListener('controllerchange',()=>location.reload())
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(applyingUpdate)location.reload()})
   navigator.serviceWorker.register('./sw.js').then(reg=>{
     swRegistration=reg
     refreshUpdateUI()

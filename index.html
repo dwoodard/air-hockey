@@ -13,7 +13,7 @@
 </head>
 <body>
 <main>
-<header><div><small>ARCADE CLUB</small><h1>Air Hockey</h1></div><button id="menu" hidden>Exit match</button></header>
+<header><div><small>ARCADE CLUB</small><h1>Air Hockey</h1></div><div class="header-actions"><button id="settings-toggle" aria-label="Open settings">Settings</button><button id="menu" hidden>Exit match</button></div></header>
 <div class="rink">
 <canvas width="480" height="680" aria-label="Air hockey rink"></canvas>
 <div class="score" id="score" aria-live="polite">0 <span>:</span> 0</div>
@@ -28,5 +28,13 @@
 </div>
 <footer id="hint">Drag your paddle • Mouse and touch supported</footer>
 </main>
+<dialog id="settings-dialog" aria-labelledby="settings-title">
+  <div class="settings-head"><h2 id="settings-title">Settings</h2><button id="settings-close" aria-label="Close settings">✕</button></div>
+  <h3>App updates</h3>
+  <p id="update-status" role="status">Check for the latest version of Air Hockey.</p>
+  <button id="check-update" class="primary">Check for updates</button>
+  <button id="apply-update" class="primary" hidden>Install update</button>
+  <p class="settings-note">Updates restart the game. Finish an active match before installing.</p>
+</dialog>
 </body>
 </html>
